@@ -1,20 +1,27 @@
 package com.sksamuel.scoverage.samples
 
-import org.scalatest.{OneInstancePerTest, FlatSpec}
+import java.util.UUID
+
+import org.scalatest.{FlatSpec, OneInstancePerTest}
 import akka.actor.{ActorSystem, Props}
 import akka.testkit.TestProbe
+
 import scala.concurrent.duration._
 import scala.language.postfixOps
+import scala.util.Random
 
 /** @author Stephen Samuel */
 class ClientActorTest extends FlatSpec with OneInstancePerTest {
 
-  val req = MarketOrderRequest(Instrument("CVX", "Chevron"), BigDecimal.valueOf(400))
+  val req =
+    MarketOrderRequest(Instrument("CVX", "Chevron"), BigDecimal.valueOf(400))
 
   val system = ActorSystem("scales-test")
   val priceEngine = TestProbe()(system)
   val orderEngine = TestProbe()(system)
-  val client = system.actorOf(Props(classOf[ClientActor], priceEngine.ref, orderEngine.ref))
+  val client = system.actorOf(
+    Props(classOf[ClientActor], priceEngine.ref, orderEngine.ref)
+  )
 
   "a client actor" should "ask for a quote" in {
     priceEngine.expectMsgType[RequestForQuote]
@@ -41,4 +48,32 @@ class ClientActorTest extends FlatSpec with OneInstancePerTest {
     client ! quote
     orderEngine.expectNoMsg(2 seconds)
   }
+
+  it should "MarketOrderReject" in {
+    val quote = MarketOrderReject(
+      MarketOrderRequest(
+        instrument = Instrument("symbol", "name"),
+        units = BigDecimal(Random.nextInt(100))
+      )
+    )
+    client ! quote
+  }
+
+  it should "MarketOrderAccept" in {
+    val quote = MarketOrderAccept(
+      Order(
+        MarketOrderRequest(
+          instrument = Instrument("symbol", "name"),
+          units = BigDecimal(Random.nextInt(100))
+        ),
+        BigDecimal(Random.nextInt(100))
+      ),
+      MarketOrderRequest(
+        instrument = Instrument("symbol", "name"),
+        units = BigDecimal(Random.nextInt(100))
+      )
+    )
+    client ! quote
+  }
+
 }
