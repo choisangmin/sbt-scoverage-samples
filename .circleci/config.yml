@@ -7,8 +7,6 @@ jobs:
   build:
     docker:
     # specify the version you desire here
-    - image: circleci/python
-
     - image: circleci/openjdk:8-jdk
 
     # Specify service dependencies here if necessary
@@ -41,6 +39,5 @@ jobs:
         key: v1-dependencies--{{ checksum "build.sbt" }}
 
     # run coverage test!
-    - run: cat /dev/null | python -V
-    - run: cat /dev/null | pip install --user codecov
-    - run: cat /dev/null | sbt clean coverage test coverageReport && codecov -t 3d867ddb-fca5-4e1e-8577-724bda1cab34
+    - run: cat /dev/null | sbt clean coverage test coverageReport
+    - run: cat /dev/null | bash <(curl -s https://codecov.io/bash) -t 3d867ddb-fca5-4e1e-8577-724bda1cab34
