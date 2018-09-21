@@ -39,5 +39,5 @@ jobs:
         key: v1-dependencies--{{ checksum "build.sbt" }}
 
     # run coverage test!
-    - run: cat /dev/null | sbt clean coverage test coverageReport
+    - run: cat /dev/null | sbt coverage test coverageReport
     - run: cat /dev/null | bash <(curl -s https://codecov.io/bash) -t 3d867ddb-fca5-4e1e-8577-724bda1cab34
